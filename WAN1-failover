@@ -42,7 +42,6 @@ if ([:typeof $previntstatWAN1] = "nothing") do={
 
 ### Actions
 
-
 :if (($intdown = "PPPoEDown") && ($previntstatWAN1 = "up")) do={
     :put "Failover-Monitor: PPPoE session '$iface' is not connected, adjusting route distances and clearing connections"
     :log info "Failover-Monitor: PPPoE session '$iface' is not connected, adjusting route distances and clearing connections"
@@ -97,6 +96,7 @@ if ([:typeof $previntstatWAN1] = "nothing") do={
                }
         }
     }
+    :delay 0.5
     :foreach i in=[/ip firewall connection find  where protocol~"udp"]  do={/ip firewall connection remove $i}
     :set previntstatWAN1 noping
     :beep length=0.8
@@ -106,12 +106,21 @@ if ([:typeof $previntstatWAN1] = "nothing") do={
 :if (($intdown = false) && (($previntstatWAN1 = "down") or ($previntstatWAN1 = "private") or ($previntstatWAN1 = "noping"))) do={
     :put "Failover-Monitor: '$iface' interface has gone up, adjusting route distances and clearing connections"
     :log info "Failover-Monitor: '$iface' interface has gone up, adjusting route distances and clearing connections"
-    :foreach i in=[/ip route find  where gateway="$iface" static]  do={/ip route set $i distance=1}
+    :foreach i in=[/ip route find  where gateway="$iface" static]  do={
+        :if (([/ip route get $i routing-mark]!="$[:pick "$iface" 0 4]"."_Inbound") || ([:typeof [/ip route get $i routing-mark]] = "nil")) do={
+          :local routedist [/ip route get $i distance]
+          :if ($routedist >= 10) do={
+              /ip route set $i distance=($routedist / 10)
+           } else={
+               :put "Failover-Monitor: Route distance for $iface is less than 10, I don't know what to do!"
+               :log info "Failover-Monitor: Route distance for $iface is less than 10, I don't know what to do!"
+               }
+        }
+    }
     :delay 0.5
     :foreach i in=[/ip firewall connection find  where protocol~"udp"]  do={/ip firewall connection remove $i}
     :set previntstatWAN1 up 
     :beep length=0.5
     :delay 1
     :beep length=0.5
-
 }
