@@ -1,4 +1,4 @@
-local intcheck "WAN1 - Plusnet VDSL"
+local iface "WAN1 - Plusnet VDSL"
 local intdown
 local CurrentIP
 global previntstatWAN1
@@ -12,10 +12,10 @@ if ([:typeof $previntstatWAN1] = "nothing") do={
    } 
 
 
-   :if [ /interface pppoe-client get $intcheck running] do={
-    :put "Failover-Monitor: '$intcheck' interface is running"
+   :if [ /interface pppoe-client get $iface running] do={
+    :put "Failover-Monitor: '$iface' interface is running"
 
-    :set CurrentIP [ /ip address get [find interface=$intcheck disabled=no] address ]
+    :set CurrentIP [ /ip address get [find interface=$iface disabled=no] address ]
     :for i from=( [:len $CurrentIP] - 1) to=0 do={
          :if ( [:pick $CurrentIP $i] = "/") do={ :set CurrentIP [:pick $CurrentIP 0 $i] } 
      }
@@ -24,61 +24,87 @@ if ([:typeof $previntstatWAN1] = "nothing") do={
 
     :if (($CurrentIP in 172.16.0.0/12) or ($CurrentIP in 10.0.0.0/8)) do={
         :set intdown private
-        :put "Failover-Monitor: '$intcheck' interface has been assigned a private IP"
+        :put "Failover-Monitor: '$iface' interface has been assigned a private IP"
     } else={
-         :if ([/ping $ping1 interface=$intcheck count=3 interval=0.5] = 3) do={
-             :put "Failover-Monitor: Ping responding on '$intcheck' for $ping1"
+         :if ([/ping $ping1 interface=$iface count=3 interval=0.5] = 3) do={
+             :put "Failover-Monitor: Ping responding on '$iface' for $ping1"
              :set intdown false
          } else={
-              :if ([/ping $ping2 interface=$intcheck count=3 interval=0.5] < 3) do={
-             :put "Failover-Monitor: Ping not responding on '$intcheck' for $ping2"
+              :if ([/ping $ping2 interface=$iface count=3 interval=0.5] < 3) do={
+             :put "Failover-Monitor: Ping not responding on '$iface' for $ping2"
              :set intdown noping
                 }
             }
     } 
        
     } else={
-        :put "'$intcheck' PPPoE is not connected"
+        :put "'$iface' PPPoE is not connected"
         :set intdown PPPoEDown
-       }
+}
 
 ### Actions
 
 
 :if (($intdown = "PPPoEDown") && ($previntstatWAN1 = "up")) do={
-    :foreach i in=[/ip route find  where gateway="$intcheck" static]  do={/ip route set $i distance=10}
+    :foreach i in=[/ip route find  where gateway="$iface" static]  do={
+        :if (([/ip route get $i routing-mark]!="$[:pick "$iface" 0 4]"."_Inbound") || ([:typeof [/ip route get $i routing-mark]] = "nil")) do={
+          :local routedist [/ip route get $i distance]
+          :if ($routedist < 10) do={
+              /ip route set $i distance=($routedist * 10)
+           } else={
+               :put "Failover-Monitor: Route distance for $iface is greater than 10, I don't know what to do!"
+               }
+        }
+    }
     :delay 0.5
     :foreach i in=[/ip firewall connection find  where protocol~"udp"]  do={/ip firewall connection remove $i}
     :set previntstatWAN1 down
-    :log info "Failover-Monitor: PPPoE session '$intcheck' is not connected, adjusting route distances and clearing connections"
+    :log info "Failover-Monitor: PPPoE session '$iface' is not connected, adjusting route distances and clearing connections"
     :beep length=0.8
 }
 
 :if (($intdown = "private") && ($previntstatWAN1 != "private")) do={
-    :foreach i in=[/ip route find  where gateway="$intcheck" static]  do={/ip route set $i distance=10}
+    :foreach i in=[/ip route find  where gateway="$iface" static]  do={
+        :if (([/ip route get $i routing-mark]!="$[:pick "$iface" 0 4]"."_Inbound") || ([:typeof [/ip route get $i routing-mark]] = "nil")) do={
+          :local routedist [/ip route get $i distance]
+          :if ($routedist < 10) do={
+              /ip route set $i distance=($routedist * 10)
+           } else={
+               :put "Failover-Monitor: Route distance for $iface is greater than 10, I don't know what to do!"
+               }
+        }
+    }
     :delay 0.5
     :foreach i in=[/ip firewall connection find  where protocol~"udp"]  do={/ip firewall connection remove $i}
     :set previntstatWAN1 private
-    :log info "Failover-Monitor: '$intcheck' interface has a private IP address, adjusting route distances and clearing connections"
+    :log info "Failover-Monitor: '$iface' interface has a private IP address, adjusting route distances and clearing connections"
     :beep length=0.8
 }
-
     
 :if (($intdown = "noping") && ($previntstatWAN1 != "noping")) do={
-    :foreach i in=[/ip route find  where gateway="$intcheck" static]  do={/ip route set $i distance=10}
+    :foreach i in=[/ip route find  where gateway="$iface" static]  do={
+        :if (([/ip route get $i routing-mark]!="$[:pick "$iface" 0 4]"."_Inbound") || ([:typeof [/ip route get $i routing-mark]] = "nil")) do={
+          :local routedist [/ip route get $i distance]
+          :if ($routedist < 10) do={
+              /ip route set $i distance=($routedist * 10)
+           } else={
+               :put "Failover-Monitor: Route distance for $iface is greater than 10, I don't know what to do!"
+               }
+        }
+    }
     :foreach i in=[/ip firewall connection find  where protocol~"udp"]  do={/ip firewall connection remove $i}
     :set previntstatWAN1 noping
-    :log info "Failover-Monitor: '$intcheck' interface is not getting responses to pings from $ping1 & $ping2, adjusting route distances and clearing connections"
+    :log info "Failover-Monitor: '$iface' interface is not getting responses to pings from $ping1 & $ping2, adjusting route distances and clearing connections"
     :beep length=0.8
 }
 
 
 :if (($intdown = false) && (($previntstatWAN1 = "down") or ($previntstatWAN1 = "private") or ($previntstatWAN1 = "noping"))) do={
-    :foreach i in=[/ip route find  where gateway="$intcheck" static]  do={/ip route set $i distance=1}
+    :foreach i in=[/ip route find  where gateway="$iface" static]  do={/ip route set $i distance=1}
     :delay 0.5
     :foreach i in=[/ip firewall connection find  where protocol~"udp"]  do={/ip firewall connection remove $i}
     :set previntstatWAN1 up 
-    :log info "Failover-Monitor: '$intcheck' interface has gone up, adjusting route distances and clearing connections"
+    :log info "Failover-Monitor: '$iface' interface has gone up, adjusting route distances and clearing connections"
     :beep length=0.5
     :delay 1
     :beep length=0.5
