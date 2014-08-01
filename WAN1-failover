@@ -53,6 +53,7 @@ if ([:typeof $previntstatWAN1] = "nothing") do={
               /ip route set $i distance=($routedist * 10)
            } else={
                :put "Failover-Monitor: Route distance for $iface is greater than 10, I don't know what to do!"
+               :log info "Failover-Monitor: Route distance for $iface is greater than 10, I don't know what to do!"
                }
         }
     }
@@ -71,6 +72,7 @@ if ([:typeof $previntstatWAN1] = "nothing") do={
               /ip route set $i distance=($routedist * 10)
            } else={
                :put "Failover-Monitor: Route distance for $iface is greater than 10, I don't know what to do!"
+               :log info "Failover-Monitor: Route distance for $iface is greater than 10, I don't know what to do!"
                }
         }
     }
@@ -89,6 +91,7 @@ if ([:typeof $previntstatWAN1] = "nothing") do={
               /ip route set $i distance=($routedist * 10)
            } else={
                :put "Failover-Monitor: Route distance for $iface is greater than 10, I don't know what to do!"
+               :log info "Failover-Monitor: Route distance for $iface is greater than 10, I don't know what to do!"
                }
         }
     }
