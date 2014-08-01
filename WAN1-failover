@@ -10,7 +10,7 @@ if ([:typeof $previntstatWAN1] = "nothing") do={
    } 
 
 
-   :if [ /interface pppoe-client get $iface running] do={
+:if [ /interface pppoe-client get $iface running] do={
     :put "Failover-Monitor: '$iface' interface is running"
 
     :set CurrentIP [ /ip address get [find interface=$iface disabled=no] address ]
