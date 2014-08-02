@@ -18,6 +18,7 @@ if ([:typeof $previntstatWAN1] = "nothing") do={
 :if (($CurrentIP in 172.16.0.0/12) or ($CurrentIP in 10.0.0.0/8)) do={
   :set intdown private
   :put "Failover-Monitor: '$iface' interface has been assigned a private IP"
+  :log info "Failover-Monitor: '$iface' interface has been assigned a private IP"
   } else={
       :if ([/ping $ping1 interface=$iface count=3 interval=0.5] < 3) do={
         :put "Failover-Monitor: Ping responding on '$iface' for $ping1"
