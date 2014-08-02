@@ -78,8 +78,8 @@ if ([:typeof $previntstatWAN1] = "nothing") do={
     :beep length=0.8
 } else={
     :if (($intdown = "EthDown") && (($previntstatWAN1 != "up") && ($previntstatWAN1 != "EthDown"))) do={
-      :put "Failover-Monitor: Connection state for $pppoeiface has changed from $previnstatWAN1 to $intdown"
-      :log info "Failover-Monitor: Connection state for $pppoeiface has changed from $previnstatWAN1 to $intdown"
+      :put "Failover-Monitor: Connection state for $pppoeiface has changed from $previntstatWAN1 to $intdown"
+      :log info "Failover-Monitor: Connection state for $pppoeiface has changed from $previntstatWAN1 to $intdown"
       :set previntstatWAN1 EthDown
     }
 }
@@ -104,8 +104,8 @@ if ([:typeof $previntstatWAN1] = "nothing") do={
     :beep length=0.8
 } else={
     :if (($intdown = "PPPoEDown") && (($previntstatWAN1 != "up") && ($previntstatWAN1 != "EthDown"))) do={
-      :put "Failover-Monitor: Connection state for $pppoeiface has changed from $previnstatWAN1 to $intdown"
-      :log info "Failover-Monitor: Connection state for $pppoeiface has changed from $previnstatWAN1 to $intdown"
+      :put "Failover-Monitor: Connection state for $pppoeiface has changed from $previntstatWAN1 to $intdown"
+      :log info "Failover-Monitor: Connection state for $pppoeiface has changed from $previntstatWAN1 to $intdown"
       :set previntstatWAN1 PPPoEDown
     }
 }
@@ -130,8 +130,8 @@ if ([:typeof $previntstatWAN1] = "nothing") do={
     :beep length=0.8
 } else={
     :if (($intdown = "private") && (($previntstatWAN1 != "up") && ($previntstatWAN1 != "EthDown"))) do={
-      :put "Failover-Monitor: Connection state for $pppoeiface has changed from $previnstatWAN1 to $intdown"
-      :log info "Failover-Monitor: Connection state for $pppoeiface has changed from $previnstatWAN1 to $intdown"
+      :put "Failover-Monitor: Connection state for $pppoeiface has changed from $previntstatWAN1 to $intdown"
+      :log info "Failover-Monitor: Connection state for $pppoeiface has changed from $previntstatWAN1 to $intdown"
       :set previntstatWAN1 private
     }
 }
@@ -156,8 +156,8 @@ if ([:typeof $previntstatWAN1] = "nothing") do={
     :beep length=0.8
 } else={
     :if (($intdown = "noping") && (($previntstatWAN1 != "up") && ($previntstatWAN1 != "EthDown"))) do={
-      :put "Failover-Monitor: Connection state for $pppoeiface has changed from $previnstatWAN1 to $intdown"
-      :log info "Failover-Monitor: Connection state for $pppoeiface has changed from $previnstatWAN1 to $intdown"
+      :put "Failover-Monitor: Connection state for $pppoeiface has changed from $previntstatWAN1 to $intdown"
+      :log info "Failover-Monitor: Connection state for $pppoeiface has changed from $previntstatWAN1 to $intdown"
       :set previntstatWAN1 noping
     }
 }
