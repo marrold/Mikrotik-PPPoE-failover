@@ -40,6 +40,11 @@ if ([:typeof $previntstatWAN1] = "nothing") do={
 } on-error={
     :put "Failover-Monitor: Unable to check IP for '$iface'"
     :log info "Failover-Monitor: Unable to check IP for '$iface'"
+    :if ([:interface pppoe-client get "$iface" running] = false) do={
+      :put "Failover-Monitor: '$iface' PPPoE is not connected"
+      :log info "Failover-Monitor: '$iface' PPPoE is not connected"
+      :set intdown PPPoEDown
+    }
   }
 
 ### Actions
