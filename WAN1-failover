@@ -20,18 +20,18 @@ if ([:typeof $previntstatWAN1] = "nothing") do={
   :if (($CurrentIP in 172.16.0.0/12) or ($CurrentIP in 10.0.0.0/8)) do={
     :set intdown private
     :put "Failover-Monitor: '$pppoeiface' interface has been assigned a private IP"
-    :log info "Failover-Monitor: '$pppoeiface' interface has been assigned a private IP"
+#    :log info "Failover-Monitor: '$pppoeiface' interface has been assigned a private IP"
     } else={
         :if ([/ping $ping1 interface=$pppoeiface count=3 interval=0.5] < 3) do={
           :put "Failover-Monitor: Ping responding on '$pppoeiface' for $ping1"
-          :log info "Failover-Monitor: Ping responding on '$pppoeiface' for $ping1"
+#          :log info "Failover-Monitor: Ping responding on '$pppoeiface' for $ping1"
           :if ([/ping $ping2 interface=$pppoeiface count=3 interval=0.5] < 3) do={
             :put "Failover-Monitor: Ping not responding on '$pppoeiface' for $ping2"
-            :log info "Failover-Monitor: Ping not responding on '$pppoeiface' for ping2"
+#            :log info "Failover-Monitor: Ping not responding on '$pppoeiface' for ping2"
             :set intdown noping
             :if ([:interface pppoe-client get "$pppoeiface" running] = false) do={
               :put "Failover-Monitor: '$pppoeiface' PPPoE is not connected"
-              :log info "Failover-Monitor: '$pppoeiface' PPPoE is not connected"
+#              :log info "Failover-Monitor: '$pppoeiface' PPPoE is not connected"
               :set intdown PPPoEDown
             }
           } else={:set intdown false}
@@ -41,10 +41,10 @@ if ([:typeof $previntstatWAN1] = "nothing") do={
       }
 } on-error={
     :put "Failover-Monitor: Unable to check IP for '$pppoeiface'"
-    :log info "Failover-Monitor: Unable to check IP for '$pppoeiface'"
+#    :log info "Failover-Monitor: Unable to check IP for '$pppoeiface'"
     :if ([:interface pppoe-client get "$pppoeiface" running] = false) do={
       :put "Failover-Monitor: '$pppoeiface' PPPoE is not connected"
-      :log info "Failover-Monitor: '$pppoeiface' PPPoE is not connected"
+#      :log info "Failover-Monitor: '$pppoeiface' PPPoE is not connected"
       :set intdown PPPoEDown
     }
     :if ([:interface ethernet  get "$ethiface" running] = false) do={
