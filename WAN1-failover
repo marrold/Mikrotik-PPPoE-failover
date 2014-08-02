@@ -1,5 +1,5 @@
-local iface "WAN1 - Plusnet VDSL"
-local eface "06 - Plusnet VDSL"
+local pppoeiface "WAN1 - Plusnet VDSL"
+local ethiface "06 - Plusnet VDSL"
 local intdown
 local CurrentIP
 global previntstatWAN1
@@ -11,7 +11,7 @@ if ([:typeof $previntstatWAN1] = "nothing") do={
    } 
 
 :do {
-  :set CurrentIP [ /ip address get [find interface=$iface disabled=no] address ]
+  :set CurrentIP [ /ip address get [find interface=$pppoeiface disabled=no] address ]
   :for i from=( [:len $CurrentIP] - 1) to=0 do={
     :if ( [:pick $CurrentIP $i] = "/") do={ :set CurrentIP [:pick $CurrentIP 0 $i] } 
     }
@@ -19,19 +19,19 @@ if ([:typeof $previntstatWAN1] = "nothing") do={
 
   :if (($CurrentIP in 172.16.0.0/12) or ($CurrentIP in 10.0.0.0/8)) do={
     :set intdown private
-    :put "Failover-Monitor: '$iface' interface has been assigned a private IP"
-    :log info "Failover-Monitor: '$iface' interface has been assigned a private IP"
+    :put "Failover-Monitor: '$pppoeiface' interface has been assigned a private IP"
+    :log info "Failover-Monitor: '$pppoeiface' interface has been assigned a private IP"
     } else={
-        :if ([/ping $ping1 interface=$iface count=3 interval=0.5] < 3) do={
-          :put "Failover-Monitor: Ping responding on '$iface' for $ping1"
-          :log info "Failover-Monitor: Ping responding on '$iface' for $ping1"
-          :if ([/ping $ping2 interface=$iface count=3 interval=0.5] < 3) do={
-            :put "Failover-Monitor: Ping not responding on '$iface' for $ping2"
-            :log info "Failover-Monitor: Ping not responding on '$iface' for ping2"
+        :if ([/ping $ping1 interface=$pppoeiface count=3 interval=0.5] < 3) do={
+          :put "Failover-Monitor: Ping responding on '$pppoeiface' for $ping1"
+          :log info "Failover-Monitor: Ping responding on '$pppoeiface' for $ping1"
+          :if ([/ping $ping2 interface=$pppoeiface count=3 interval=0.5] < 3) do={
+            :put "Failover-Monitor: Ping not responding on '$pppoeiface' for $ping2"
+            :log info "Failover-Monitor: Ping not responding on '$pppoeiface' for ping2"
             :set intdown noping
-            :if ([:interface pppoe-client get "$iface" running] = false) do={
-              :put "Failover-Monitor: '$iface' PPPoE is not connected"
-              :log info "Failover-Monitor: '$iface' PPPoE is not connected"
+            :if ([:interface pppoe-client get "$pppoeiface" running] = false) do={
+              :put "Failover-Monitor: '$pppoeiface' PPPoE is not connected"
+              :log info "Failover-Monitor: '$pppoeiface' PPPoE is not connected"
               :set intdown PPPoEDown
             }
           } else={:set intdown false}
@@ -40,33 +40,33 @@ if ([:typeof $previntstatWAN1] = "nothing") do={
 ### Insert Interface down section here ###        
       }
 } on-error={
-    :put "Failover-Monitor: Unable to check IP for '$iface'"
-    :log info "Failover-Monitor: Unable to check IP for '$iface'"
-    :if ([:interface pppoe-client get "$iface" running] = false) do={
-      :put "Failover-Monitor: '$iface' PPPoE is not connected"
-      :log info "Failover-Monitor: '$iface' PPPoE is not connected"
+    :put "Failover-Monitor: Unable to check IP for '$pppoeiface'"
+    :log info "Failover-Monitor: Unable to check IP for '$pppoeiface'"
+    :if ([:interface pppoe-client get "$pppoeiface" running] = false) do={
+      :put "Failover-Monitor: '$pppoeiface' PPPoE is not connected"
+      :log info "Failover-Monitor: '$pppoeiface' PPPoE is not connected"
       :set intdown PPPoEDown
     }
-    :if ([:interface ethernet  get "$eface" running] = false) do={
-      :put "Failover-Monitor: '$eface' ethernet is not connected"
-      :log info "Failover-Monitor: '$eface' ethernet is not connected"
+    :if ([:interface ethernet  get "$ethiface" running] = false) do={
+      :put "Failover-Monitor: '$ethiface' ethernet is not connected"
+      :log info "Failover-Monitor: '$ethiface' ethernet is not connected"
       :set intdown EthDown
     }
   }
 
 ### Actions
 
-:if (($intdown = "EthDown") && ($previntstatWAN1 != "EthDown")) do={
-    :put "Failover-Monitor: Ethernet port '$eface' is not connected, adjusting route distances and clearing connections"
-    :log info "Failover-Monitor: Ethernet port '$eface' is not connected, adjusting route distances and clearing connections"
-    :foreach i in=[/ip route find  where gateway="$iface" static]  do={
-        :if (([/ip route get $i routing-mark]!="$[:pick "$iface" 0 4]"."_Inbound") || ([:typeof [/ip route get $i routing-mark]] = "nil")) do={
+:if (($intdown = "EthDown") && ($previntstatWAN1 = "up")) do={
+    :put "Failover-Monitor: Ethernet port '$ethiface' is not connected, adjusting route distances and clearing connections"
+    :log info "Failover-Monitor: Ethernet port '$ethiface' is not connected, adjusting route distances and clearing connections"
+    :foreach i in=[/ip route find  where gateway="$pppoeiface" static]  do={
+        :if (([/ip route get $i routing-mark]!="$[:pick "$pppoeiface" 0 4]"."_Inbound") || ([:typeof [/ip route get $i routing-mark]] = "nil")) do={
           :local routedist [/ip route get $i distance]
           :if ($routedist < 10) do={
               /ip route set $i distance=($routedist * 10)
            } else={
-               :put "Failover-Monitor: Route distance for $iface is greater than 10, I don't know what to do!"
-               :log info "Failover-Monitor: Route distance for $iface is greater than 10, I don't know what to do!"
+               :put "Failover-Monitor: Route distance for $pppoeiface is greater than 10, I don't know what to do!"
+               :log info "Failover-Monitor: Route distance for $pppoeiface is greater than 10, I don't know what to do!"
                }
         }
     }
@@ -74,19 +74,24 @@ if ([:typeof $previntstatWAN1] = "nothing") do={
     :foreach i in=[/ip firewall connection find  where protocol~"udp"]  do={/ip firewall connection remove $i}
     :set previntstatWAN1 EthDown
     :beep length=0.8
+} else={
+    :if (($intdown = "EthDown") && (($previntstatWAN1 != "up") && ($previntstatWAN1 != "EthDown"))) &&  do={
+      :put "Failover-Monitor: Connection state for $pppoeiface has changed from $previnstatWAN1 to $intdown"
+      :log info "Failover-Monitor: Connection state for $pppoeiface has changed from $previnstatWAN1 to $intdown"
+      :set previntstatWAN1 EthDown
 }
 
-:if (($intdown = "PPPoEDown") && ($previntstatWAN1 != "PPPoEDown")) do={
-    :put "Failover-Monitor: PPPoE session '$iface' is not connected, adjusting route distances and clearing connections"
-    :log info "Failover-Monitor: PPPoE session '$iface' is not connected, adjusting route distances and clearing connections"
-    :foreach i in=[/ip route find  where gateway="$iface" static]  do={
-        :if (([/ip route get $i routing-mark]!="$[:pick "$iface" 0 4]"."_Inbound") || ([:typeof [/ip route get $i routing-mark]] = "nil")) do={
+:if (($intdown = "PPPoEDown") && ($previntstatWAN1 = "up")) do={
+    :put "Failover-Monitor: PPPoE session '$pppoeiface' is not connected, adjusting route distances and clearing connections"
+    :log info "Failover-Monitor: PPPoE session '$pppoeiface' is not connected, adjusting route distances and clearing connections"
+    :foreach i in=[/ip route find  where gateway="$pppoeiface" static]  do={
+        :if (([/ip route get $i routing-mark]!="$[:pick "$pppoeiface" 0 4]"."_Inbound") || ([:typeof [/ip route get $i routing-mark]] = "nil")) do={
           :local routedist [/ip route get $i distance]
           :if ($routedist < 10) do={
               /ip route set $i distance=($routedist * 10)
            } else={
-               :put "Failover-Monitor: Route distance for $iface is greater than 10, I don't know what to do!"
-               :log info "Failover-Monitor: Route distance for $iface is greater than 10, I don't know what to do!"
+               :put "Failover-Monitor: Route distance for $pppoeiface is greater than 10, I don't know what to do!"
+               :log info "Failover-Monitor: Route distance for $pppoeiface is greater than 10, I don't know what to do!"
                }
         }
     }
@@ -94,19 +99,24 @@ if ([:typeof $previntstatWAN1] = "nothing") do={
     :foreach i in=[/ip firewall connection find  where protocol~"udp"]  do={/ip firewall connection remove $i}
     :set previntstatWAN1 PPPoEDown
     :beep length=0.8
+} else={
+    :if (($intdown = "PPPoEDown") && (($previntstatWAN1 != "up") && ($previntstatWAN1 != "EthDown"))) &&  do={
+      :put "Failover-Monitor: Connection state for $pppoeiface has changed from $previnstatWAN1 to $intdown"
+      :log info "Failover-Monitor: Connection state for $pppoeiface has changed from $previnstatWAN1 to $intdown"
+      :set previntstatWAN1 PPPoEDown
 }
 
-:if (($intdown = "private") && ($previntstatWAN1 != "private")) do={
-    :put "Failover-Monitor: '$iface' interface has a private IP address, adjusting route distances and clearing connections"
-    :log info "Failover-Monitor: '$iface' interface has a private IP address, adjusting route distances and clearing connections"
-    :foreach i in=[/ip route find  where gateway="$iface" static]  do={
-        :if (([/ip route get $i routing-mark]!="$[:pick "$iface" 0 4]"."_Inbound") || ([:typeof [/ip route get $i routing-mark]] = "nil")) do={
+:if (($intdown = "private") && ($previntstatWAN1 = "up")) do={
+    :put "Failover-Monitor: '$pppoeiface' interface has a private IP address, adjusting route distances and clearing connections"
+    :log info "Failover-Monitor: '$pppoeiface' interface has a private IP address, adjusting route distances and clearing connections"
+    :foreach i in=[/ip route find  where gateway="$pppoeiface" static]  do={
+        :if (([/ip route get $i routing-mark]!="$[:pick "$pppoeiface" 0 4]"."_Inbound") || ([:typeof [/ip route get $i routing-mark]] = "nil")) do={
           :local routedist [/ip route get $i distance]
           :if ($routedist < 10) do={
               /ip route set $i distance=($routedist * 10)
            } else={
-               :put "Failover-Monitor: Route distance for $iface is greater than 10, I don't know what to do!"
-               :log info "Failover-Monitor: Route distance for $iface is greater than 10, I don't know what to do!"
+               :put "Failover-Monitor: Route distance for $pppoeiface is greater than 10, I don't know what to do!"
+               :log info "Failover-Monitor: Route distance for $pppoeiface is greater than 10, I don't know what to do!"
                }
         }
     }
@@ -114,19 +124,24 @@ if ([:typeof $previntstatWAN1] = "nothing") do={
     :foreach i in=[/ip firewall connection find  where protocol~"udp"]  do={/ip firewall connection remove $i}
     :set previntstatWAN1 private
     :beep length=0.8
+} else={
+    :if (($intdown = "private") && (($previntstatWAN1 != "up") && ($previntstatWAN1 != "EthDown"))) &&  do={
+      :put "Failover-Monitor: Connection state for $pppoeiface has changed from $previnstatWAN1 to $intdown"
+      :log info "Failover-Monitor: Connection state for $pppoeiface has changed from $previnstatWAN1 to $intdown"
+      :set previntstatWAN1 private
 }
     
-:if (($intdown = "noping") && ($previntstatWAN1 != "noping")) do={
-    :put "Failover-Monitor: '$iface' interface is not getting responses to pings from $ping1 & $ping2, adjusting route distances and clearing connections"
-    :log info "Failover-Monitor: '$iface' interface is not getting responses to pings from $ping1 & $ping2, adjusting route distances and clearing connections"
-    :foreach i in=[/ip route find  where gateway="$iface" static]  do={
-        :if (([/ip route get $i routing-mark]!="$[:pick "$iface" 0 4]"."_Inbound") || ([:typeof [/ip route get $i routing-mark]] = "nil")) do={
+:if (($intdown = "noping") && ($previntstatWAN1 = "up")) do={
+    :put "Failover-Monitor: '$pppoeiface' interface is not getting responses to pings from $ping1 & $ping2, adjusting route distances and clearing connections"
+    :log info "Failover-Monitor: '$pppoeiface' interface is not getting responses to pings from $ping1 & $ping2, adjusting route distances and clearing connections"
+    :foreach i in=[/ip route find  where gateway="$pppoeiface" static]  do={
+        :if (([/ip route get $i routing-mark]!="$[:pick "$pppoeiface" 0 4]"."_Inbound") || ([:typeof [/ip route get $i routing-mark]] = "nil")) do={
           :local routedist [/ip route get $i distance]
           :if ($routedist < 10) do={
               /ip route set $i distance=($routedist * 10)
            } else={
-               :put "Failover-Monitor: Route distance for $iface is greater than 10, I don't know what to do!"
-               :log info "Failover-Monitor: Route distance for $iface is greater than 10, I don't know what to do!"
+               :put "Failover-Monitor: Route distance for $pppoeiface is greater than 10, I don't know what to do!"
+               :log info "Failover-Monitor: Route distance for $pppoeiface is greater than 10, I don't know what to do!"
                }
         }
     }
@@ -134,20 +149,25 @@ if ([:typeof $previntstatWAN1] = "nothing") do={
     :foreach i in=[/ip firewall connection find  where protocol~"udp"]  do={/ip firewall connection remove $i}
     :set previntstatWAN1 noping
     :beep length=0.8
+} else={
+    :if (($intdown = "noping") && (($previntstatWAN1 != "up") && ($previntstatWAN1 != "EthDown"))) &&  do={
+      :put "Failover-Monitor: Connection state for $pppoeiface has changed from $previnstatWAN1 to $intdown"
+      :log info "Failover-Monitor: Connection state for $pppoeiface has changed from $previnstatWAN1 to $intdown"
+      :set previntstatWAN1 noping
 }
 
 
 :if (($intdown = false) && ($previntstatWAN1 != "up")) do={
-    :put "Failover-Monitor: '$iface' interface has gone up, adjusting route distances and clearing connections"
-    :log info "Failover-Monitor: '$iface' interface has gone up, adjusting route distances and clearing connections"
-    :foreach i in=[/ip route find  where gateway="$iface" static]  do={
-        :if (([/ip route get $i routing-mark]!="$[:pick "$iface" 0 4]"."_Inbound") || ([:typeof [/ip route get $i routing-mark]] = "nil")) do={
+    :put "Failover-Monitor: '$pppoeiface' interface has gone up, adjusting route distances and clearing connections"
+    :log info "Failover-Monitor: '$pppoeiface' interface has gone up, adjusting route distances and clearing connections"
+    :foreach i in=[/ip route find  where gateway="$pppoeiface" static]  do={
+        :if (([/ip route get $i routing-mark]!="$[:pick "$pppoeiface" 0 4]"."_Inbound") || ([:typeof [/ip route get $i routing-mark]] = "nil")) do={
           :local routedist [/ip route get $i distance]
           :if ($routedist >= 10) do={
               /ip route set $i distance=($routedist / 10)
            } else={
-               :put "Failover-Monitor: Route distance for $iface is less than 10, I don't know what to do!"
-               :log info "Failover-Monitor: Route distance for $iface is less than 10, I don't know what to do!"
+               :put "Failover-Monitor: Route distance for $pppoeiface is less than 10, I don't know what to do!"
+               :log info "Failover-Monitor: Route distance for $pppoeiface is less than 10, I don't know what to do!"
                }
         }
     }
