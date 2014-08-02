@@ -16,6 +16,7 @@ if ([:typeof $previntstatWAN1] = "nothing") do={
     :if ( [:pick $CurrentIP $i] = "/") do={ :set CurrentIP [:pick $CurrentIP 0 $i] } 
     }
   :set CurrentIP  [:toip $CurrentIP]
+}
 
   :if (($CurrentIP in 172.16.0.0/12) or ($CurrentIP in 10.0.0.0/8)) do={
     :set intdown private
