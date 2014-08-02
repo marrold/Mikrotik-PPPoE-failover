@@ -137,7 +137,7 @@ if ([:typeof $previntstatWAN1] = "nothing") do={
 }
 
 
-:if (($intdown = false) && ($previntstatWAN1 != "false")) do={
+:if (($intdown = false) && ($previntstatWAN1 != "up")) do={
     :put "Failover-Monitor: '$iface' interface has gone up, adjusting route distances and clearing connections"
     :log info "Failover-Monitor: '$iface' interface has gone up, adjusting route distances and clearing connections"
     :foreach i in=[/ip route find  where gateway="$iface" static]  do={
