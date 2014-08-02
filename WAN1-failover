@@ -35,7 +35,7 @@ if ([:typeof $previntstatWAN1] = "nothing") do={
         }
       }
 ### Insert Interface down section here ###        
-  }
+}
 
 ### Actions
 
