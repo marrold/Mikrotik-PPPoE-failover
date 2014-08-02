@@ -49,7 +49,7 @@ if ([:typeof $previntstatWAN1] = "nothing") do={
     }
     :if ([:interface ethernet  get "$ethiface" running] = false) do={
       :put "Failover-Monitor: '$ethiface' ethernet is not connected"
-      :log info "Failover-Monitor: '$ethiface' ethernet is not connected"
+#      :log info "Failover-Monitor: '$ethiface' ethernet is not connected"
       :set intdown EthDown
     }
   }
