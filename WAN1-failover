@@ -45,6 +45,7 @@ if ([:typeof $previntstatWAN1] = "nothing") do={
       :put "Failover-Monitor: '$iface' PPPoE is not connected"
       :log info "Failover-Monitor: '$iface' PPPoE is not connected"
       :set intdown PPPoEDown
+    }
     :if ([:interface ethernet  get "$eface" running] = false) do={
       :put "Failover-Monitor: '$eface' ethernet is not connected"
       :log info "Failover-Monitor: '$eface' ethernet is not connected"
