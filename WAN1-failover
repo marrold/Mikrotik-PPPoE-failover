@@ -1,4 +1,5 @@
 local iface "WAN1 - Plusnet VDSL"
+local eface "06 - Plusnet VDSL"
 local intdown
 local CurrentIP
 global previntstatWAN1
@@ -44,12 +45,34 @@ if ([:typeof $previntstatWAN1] = "nothing") do={
       :put "Failover-Monitor: '$iface' PPPoE is not connected"
       :log info "Failover-Monitor: '$iface' PPPoE is not connected"
       :set intdown PPPoEDown
+    :if ([:interface ethernet  get "$eface" running] = false) do={
+      :put "Failover-Monitor: '$eface' ethernet is not connected"
+      :log info "Failover-Monitor: '$eface' ethernet is not connected"
+      :set intdown EthDown
     }
   }
 
 ### Actions
 
-### Insert Interface down section here ###
+:if (($intdown = "EthDown") && ($previntstatWAN1 = "up")) do={
+    :put "Failover-Monitor: Ethernet port '$eface' is not connected, adjusting route distances and clearing connections"
+    :log info "Failover-Monitor: Ethernet port '$eface' is not connected, adjusting route distances and clearing connections"
+    :foreach i in=[/ip route find  where gateway="$iface" static]  do={
+        :if (([/ip route get $i routing-mark]!="$[:pick "$iface" 0 4]"."_Inbound") || ([:typeof [/ip route get $i routing-mark]] = "nil")) do={
+          :local routedist [/ip route get $i distance]
+          :if ($routedist < 10) do={
+              /ip route set $i distance=($routedist * 10)
+           } else={
+               :put "Failover-Monitor: Route distance for $iface is greater than 10, I don't know what to do!"
+               :log info "Failover-Monitor: Route distance for $iface is greater than 10, I don't know what to do!"
+               }
+        }
+    }
+    :delay 0.5
+    :foreach i in=[/ip firewall connection find  where protocol~"udp"]  do={/ip firewall connection remove $i}
+    :set previntstatWAN1 down
+    :beep length=0.8
+}
 
 :if (($intdown = "PPPoEDown") && ($previntstatWAN1 = "up")) do={
     :put "Failover-Monitor: PPPoE session '$iface' is not connected, adjusting route distances and clearing connections"
