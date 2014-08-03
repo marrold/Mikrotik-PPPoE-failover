@@ -10,8 +10,6 @@ if ([:typeof $previntstatWAN1] = "nothing") do={
    :set previntstatWAN1 "up"
    }
 
-:local testvar
-
 :do {
   :set CurrentIP [ /ip address get [find interface=$pppoeiface disabled=no] address ]
   :for i from=( [:len $CurrentIP] - 1) to=0 do={
