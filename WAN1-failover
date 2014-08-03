@@ -8,7 +8,9 @@ local ping2 8.8.4.4
 
 if ([:typeof $previntstatWAN1] = "nothing") do={
    :set previntstatWAN1 "up"
-   } 
+   }
+
+:local testvar
 
 :do {
   :set CurrentIP [ /ip address get [find interface=$pppoeiface disabled=no] address ]
