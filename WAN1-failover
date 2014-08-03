@@ -36,8 +36,6 @@ if ([:typeof $previntstatWAN1] = "nothing") do={
             }
           } else={:set intdown false}
         } else={:set intdown false}
-
-### Insert Interface down section here ###        
       }
 } on-error={
     :put "Failover-Monitor: Unable to check IP for '$pppoeiface'"
