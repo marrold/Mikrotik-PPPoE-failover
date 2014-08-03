@@ -23,7 +23,7 @@ if ([:typeof $previntstatWAN1] = "nothing") do={
 #    :log info "Failover-Monitor: '$pppoeiface' interface has been assigned a private IP"
     } else={
         :if ([/ping $ping1 interface=$pppoeiface count=3 interval=0.5] < 3) do={
-          :put "Failover-Monitor: Ping responding on '$pppoeiface' for $ping1"
+          :put "Failover-Monitor: Ping not responding on '$pppoeiface' for $ping1"
 #          :log info "Failover-Monitor: Ping responding on '$pppoeiface' for $ping1"
           :if ([/ping $ping2 interface=$pppoeiface count=3 interval=0.5] < 3) do={
             :put "Failover-Monitor: Ping not responding on '$pppoeiface' for $ping2"
