@@ -5,6 +5,8 @@ local CurrentIP
 global previntstatWAN1
 local ping1 208.67.220.220
 local ping2 8.8.4.4
+local email1 "sean@Seanhardy.co.uk"
+local email2 "reading.alerts@marrold.co.uk"
 
 if ([:typeof $previntstatWAN1] = "nothing") do={
    :set previntstatWAN1 "up"
@@ -59,6 +61,8 @@ if ([:typeof $previntstatWAN1] = "nothing") do={
 :if (($intdown = "EthDown") && ($previntstatWAN1 = "up")) do={
     :put "Failover-Monitor: Ethernet port '$ethiface' is not connected, adjusting route distances and clearing connections"
     :log info "Failover-Monitor: Ethernet port '$ethiface' is not connected, adjusting route distances and clearing connections"
+    / tool e-mail send to=$email1 subject="$[/system identity get name]: Failover-Monitor: Ethernet port '$ethiface' is not connected" body="Ethernet port '$ethiface' is not connected at the '$[/system identity get name]' site, adjusting route distances and clearing connections." start-tls=yes
+    / tool e-mail send to=$email2 subject="$[/system identity get name]: Failover-Monitor: Ethernet port '$ethiface' is not connected" body="Ethernet port '$ethiface' is not connected at the '$[/system identity get name]' site, adjusting route distances and clearing connections." start-tls=yes
     :foreach i in=[/ip route find  where gateway="$pppoeiface" static]  do={
         :if (([/ip route get $i routing-mark]!="$[:pick "$pppoeiface" 0 4]"."_Inbound") || ([:typeof [/ip route get $i routing-mark]] = "nil")) do={
           :local routedist [/ip route get $i distance]
@@ -67,6 +71,8 @@ if ([:typeof $previntstatWAN1] = "nothing") do={
            } else={
                :put "Failover-Monitor: Route distance for $pppoeiface is greater than 10, I don't know what to do!"
                :log info "Failover-Monitor: Route distance for $pppoeiface is greater than 10, I don't know what to do!"
+               / tool e-mail send to=$email1 subject="$[/system identity get name]: Failover-Monitor: Ethernet port '$ethiface' is not connected - Unable to adjust routes" body="Ethernet port '$ethiface' is not connected at the '$[/system identity get name]' site & route distance for '$pppoeiface' is greater than 10. I don't know what to do!" start-tls=yes
+               / tool e-mail send to=$email1 subject="$[/system identity get name]: Failover-Monitor: Ethernet port '$ethiface' is not connected - Unable to adjust routes" body="Ethernet port '$ethiface' is not connected at the '$[/system identity get name]' site & route distance for '$pppoeiface' is greater than 10. I don't know what to do!" start-tls=yes
                }
         }
     }
@@ -78,6 +84,8 @@ if ([:typeof $previntstatWAN1] = "nothing") do={
     :if (($intdown = "EthDown") && (($previntstatWAN1 != "up") && ($previntstatWAN1 != "EthDown"))) do={
       :put "Failover-Monitor: Connection state for $pppoeiface has changed from $previntstatWAN1 to $intdown"
       :log info "Failover-Monitor: Connection state for $pppoeiface has changed from $previntstatWAN1 to $intdown"
+      / tool e-mail send to=$email1 subject="$[/system identity get name]: Failover-Monitor: Connection state for $pppoeiface has changed from $previntstatWAN1 to $intdown" body="Connection state for $pppoeiface has changed from $previntstatWAN1 to $intdown at the '$[/system identity get name]' site." start-tls=yes
+      / tool e-mail send to=$email2 subject="$[/system identity get name]: Failover-Monitor: Connection state for $pppoeiface has changed from $previntstatWAN1 to $intdown" body="Connection state for $pppoeiface has changed from $previntstatWAN1 to $intdown at the '$[/system identity get name]' site." start-tls=yes
       :set previntstatWAN1 EthDown
     }
 }
@@ -85,6 +93,8 @@ if ([:typeof $previntstatWAN1] = "nothing") do={
 :if (($intdown = "PPPoEDown") && ($previntstatWAN1 = "up")) do={
     :put "Failover-Monitor: PPPoE session '$pppoeiface' is not connected, adjusting route distances and clearing connections"
     :log info "Failover-Monitor: PPPoE session '$pppoeiface' is not connected, adjusting route distances and clearing connections"
+    / tool e-mail send to=$email1 subject="$[/system identity get name]: Failover-Monitor: PPPoE session '$pppoeiface' is not connected" body="PPPoE session '$pppoeiface' is not connected at the '$[/system identity get name]' site, adjusting route distances and clearing connections." start-tls=yes
+    / tool e-mail send to=$email2 subject="$[/system identity get name]: Failover-Monitor: PPPoE session '$pppoeiface' is not connected" body="PPPoE session '$pppoeiface' is not connected at the '$[/system identity get name]' site, adjusting route distances and clearing connections." start-tls=yes
     :foreach i in=[/ip route find  where gateway="$pppoeiface" static]  do={
         :if (([/ip route get $i routing-mark]!="$[:pick "$pppoeiface" 0 4]"."_Inbound") || ([:typeof [/ip route get $i routing-mark]] = "nil")) do={
           :local routedist [/ip route get $i distance]
@@ -93,6 +103,8 @@ if ([:typeof $previntstatWAN1] = "nothing") do={
            } else={
                :put "Failover-Monitor: Route distance for $pppoeiface is greater than 10, I don't know what to do!"
                :log info "Failover-Monitor: Route distance for $pppoeiface is greater than 10, I don't know what to do!"
+               / tool e-mail send to=$email1 subject="$[/system identity get name]: Failover-Monitor: PPPoE session '$pppoeiface' is not connected - Unable to adjust routes" body="PPPoE session '$pppoeiface' is not connected at the '$[/system identity get name]' site & route distance for '$pppoeiface' is greater than 10. I don't know what to do!" start-tls=yes
+               / tool e-mail send to=$email2 subject="$[/system identity get name]: Failover-Monitor: PPPoE session '$pppoeiface' is not connected - Unable to adjust routes" body="PPPoE session '$pppoeiface' is not connected at the '$[/system identity get name]' site & route distance for '$pppoeiface' is greater than 10. I don't know what to do!" start-tls=yes
                }
         }
     }
@@ -104,6 +116,8 @@ if ([:typeof $previntstatWAN1] = "nothing") do={
     :if (($intdown = "PPPoEDown") && (($previntstatWAN1 != "up") && ($previntstatWAN1 != "PPPoEDown"))) do={
       :put "Failover-Monitor: Connection state for $pppoeiface has changed from $previntstatWAN1 to $intdown"
       :log info "Failover-Monitor: Connection state for $pppoeiface has changed from $previntstatWAN1 to $intdown"
+      / tool e-mail send to=$email1 subject="$[/system identity get name]: Failover-Monitor: Connection state for $pppoeiface has changed from $previntstatWAN1 to $intdown" body="Connection state for $pppoeiface has changed from $previntstatWAN1 to $intdown at the '$[/system identity get name]' site." start-tls=yes
+      / tool e-mail send to=$email2 subject="$[/system identity get name]: Failover-Monitor: Connection state for $pppoeiface has changed from $previntstatWAN1 to $intdown" body="Connection state for $pppoeiface has changed from $previntstatWAN1 to $intdown at the '$[/system identity get name]' site." start-tls=yes
       :set previntstatWAN1 PPPoEDown
     }
 }
@@ -111,6 +125,8 @@ if ([:typeof $previntstatWAN1] = "nothing") do={
 :if (($intdown = "private") && ($previntstatWAN1 = "up")) do={
     :put "Failover-Monitor: '$pppoeiface' interface has a private IP address, adjusting route distances and clearing connections"
     :log info "Failover-Monitor: '$pppoeiface' interface has a private IP address, adjusting route distances and clearing connections"
+    / tool e-mail send to=$email1 subject="$[/system identity get name]: Failover-Monitor: '$pppoeiface' interface has a private IP address" body="'$pppoeiface' interface has a private IP address at the '$[/system identity get name]' site, adjusting route distances and clearing connections." start-tls=yes
+    / tool e-mail send to=$email2 subject="$[/system identity get name]: Failover-Monitor: '$pppoeiface' interface has a private IP address" body="'$pppoeiface' interface has a private IP address at the '$[/system identity get name]' site, adjusting route distances and clearing connections." start-tls=yes
     :foreach i in=[/ip route find  where gateway="$pppoeiface" static]  do={
         :if (([/ip route get $i routing-mark]!="$[:pick "$pppoeiface" 0 4]"."_Inbound") || ([:typeof [/ip route get $i routing-mark]] = "nil")) do={
           :local routedist [/ip route get $i distance]
@@ -119,6 +135,8 @@ if ([:typeof $previntstatWAN1] = "nothing") do={
            } else={
                :put "Failover-Monitor: Route distance for $pppoeiface is greater than 10, I don't know what to do!"
                :log info "Failover-Monitor: Route distance for $pppoeiface is greater than 10, I don't know what to do!"
+               / tool e-mail send to=$email1 subject="$[/system identity get name]: Failover-Monitor: '$pppoeiface' interface has a private IP address- Unable to adjust routes" body="'$pppoeiface' interface has a private IP address at the '$[/system identity get name]' site & route distance for $pppoeiface is greater than 10. I don't know what to do!." start-tls=yes
+               / tool e-mail send to=$email2 subject="$[/system identity get name]: Failover-Monitor: '$pppoeiface' interface has a private IP address- Unable to adjust routes" body="'$pppoeiface' interface has a private IP address at the '$[/system identity get name]' site & route distance for $pppoeiface is greater than 10. I don't know what to do!." start-tls=yes               
                }
         }
     }
@@ -130,6 +148,8 @@ if ([:typeof $previntstatWAN1] = "nothing") do={
     :if (($intdown = "private") && (($previntstatWAN1 != "up") && ($previntstatWAN1 != "private"))) do={
       :put "Failover-Monitor: Connection state for $pppoeiface has changed from $previntstatWAN1 to $intdown"
       :log info "Failover-Monitor: Connection state for $pppoeiface has changed from $previntstatWAN1 to $intdown"
+      / tool e-mail send to=$email1 subject="$[/system identity get name]: Failover-Monitor: Connection state for $pppoeiface has changed from $previntstatWAN1 to $intdown" body="Connection state for $pppoeiface has changed from $previntstatWAN1 to $intdown at the '$[/system identity get name]' site." start-tls=yes
+      / tool e-mail send to=$email2 subject="$[/system identity get name]: Failover-Monitor: Connection state for $pppoeiface has changed from $previntstatWAN1 to $intdown" body="Connection state for $pppoeiface has changed from $previntstatWAN1 to $intdown at the '$[/system identity get name]' site." start-tls=yes
       :set previntstatWAN1 private
     }
 }
@@ -137,6 +157,8 @@ if ([:typeof $previntstatWAN1] = "nothing") do={
 :if (($intdown = "noping") && ($previntstatWAN1 = "up")) do={
     :put "Failover-Monitor: '$pppoeiface' interface is not getting responses to pings from $ping1 & $ping2, adjusting route distances and clearing connections"
     :log info "Failover-Monitor: '$pppoeiface' interface is not getting responses to pings from $ping1 & $ping2, adjusting route distances and clearing connections"
+    / tool e-mail send to=$email1 subject="$[/system identity get name]: Failover-Monitor: '$pppoeiface' interface is not getting responses to pings" body=" The '$pppoeiface' interface is not getting responses to pings from $ping1 & $ping2 at the '$[/system identity get name]' site, adjusting route distances and clearing connections." start-tls=yes
+    / tool e-mail send to=$email2 subject="$[/system identity get name]: Failover-Monitor: '$pppoeiface' interface is not getting responses to pings" body=" The '$pppoeiface' interface is not getting responses to pings from $ping1 & $ping2 at the '$[/system identity get name]' site, adjusting route distances and clearing connections." start-tls=yes
     :foreach i in=[/ip route find  where gateway="$pppoeiface" static]  do={
         :if (([/ip route get $i routing-mark]!="$[:pick "$pppoeiface" 0 4]"."_Inbound") || ([:typeof [/ip route get $i routing-mark]] = "nil")) do={
           :local routedist [/ip route get $i distance]
@@ -145,6 +167,8 @@ if ([:typeof $previntstatWAN1] = "nothing") do={
            } else={
                :put "Failover-Monitor: Route distance for $pppoeiface is greater than 10, I don't know what to do!"
                :log info "Failover-Monitor: Route distance for $pppoeiface is greater than 10, I don't know what to do!"
+               / tool e-mail send to=$email1 subject="$[/system identity get name]: Failover-Monitor: '$pppoeiface' interface is not getting responses to pings- Unable to adjust routes" body="'$pppoeiface' interface is not getting responses to pings at the '$[/system identity get name]' site & route distance for $pppoeiface is greater than 10. I don't know what to do!." start-tls=yes
+               / tool e-mail send to=$email2 subject="$[/system identity get name]: Failover-Monitor: '$pppoeiface' interface is not getting responses to pings- Unable to adjust routes" body="'$pppoeiface' interface is not getting responses to pings at the '$[/system identity get name]' site & route distance for $pppoeiface is greater than 10. I don't know what to do!." start-tls=yes
                }
         }
     }
@@ -156,6 +180,8 @@ if ([:typeof $previntstatWAN1] = "nothing") do={
     :if (($intdown = "noping") && (($previntstatWAN1 != "up") && ($previntstatWAN1 != "noping"))) do={
       :put "Failover-Monitor: Connection state for $pppoeiface has changed from $previntstatWAN1 to $intdown"
       :log info "Failover-Monitor: Connection state for $pppoeiface has changed from $previntstatWAN1 to $intdown"
+      / tool e-mail send to=$email1 subject="$[/system identity get name]: Failover-Monitor: Connection state for $pppoeiface has changed from $previntstatWAN1 to $intdown" body="Connection state for $pppoeiface has changed from $previntstatWAN1 to $intdown at the '$[/system identity get name]' site." start-tls=yes
+      / tool e-mail send to=$email2 subject="$[/system identity get name]: Failover-Monitor: Connection state for $pppoeiface has changed from $previntstatWAN1 to $intdown" body="Connection state for $pppoeiface has changed from $previntstatWAN1 to $intdown at the '$[/system identity get name]' site." start-tls=yes
       :set previntstatWAN1 noping
     }
 }
@@ -164,6 +190,8 @@ if ([:typeof $previntstatWAN1] = "nothing") do={
 :if (($intdown = false) && ($previntstatWAN1 != "up")) do={
     :put "Failover-Monitor: '$pppoeiface' interface has gone up, adjusting route distances and clearing connections"
     :log info "Failover-Monitor: '$pppoeiface' interface has gone up, adjusting route distances and clearing connections"
+    / tool e-mail send to=$email1 subject="$[/system identity get name]: Failover-Monitor: '$pppoeiface' interface has gone up" body=" The '$pppoeiface' interface has gone up at the '$[/system identity get name]' site, adjusting route distances and clearing connections." start-tls=yes
+    / tool e-mail send to=$email2 subject="$[/system identity get name]: Failover-Monitor: '$pppoeiface' interface has gone up" body=" The '$pppoeiface' interface has gone up at the '$[/system identity get name]' site, adjusting route distances and clearing connections." start-tls=yes
     :foreach i in=[/ip route find  where gateway="$pppoeiface" static]  do={
         :if (([/ip route get $i routing-mark]!="$[:pick "$pppoeiface" 0 4]"."_Inbound") || ([:typeof [/ip route get $i routing-mark]] = "nil")) do={
           :local routedist [/ip route get $i distance]
@@ -172,6 +200,8 @@ if ([:typeof $previntstatWAN1] = "nothing") do={
            } else={
                :put "Failover-Monitor: Route distance for $pppoeiface is less than 10, I don't know what to do!"
                :log info "Failover-Monitor: Route distance for $pppoeiface is less than 10, I don't know what to do!"
+               / tool e-mail send to=$email1 subject="$[/system identity get name]: Failover-Monitor: '$pppoeiface' interface has gone up- Unable to adjust routes" body="'$pppoeiface' '$pppoeiface' interface has gone up at the '$[/system identity get name]' site & route distance for $pppoeiface is less than 10. I don't know what to do!." start-tls=yes
+               / tool e-mail send to=$email2 subject="$[/system identity get name]: Failover-Monitor: '$pppoeiface' interface has gone up- Unable to adjust routes" body="'$pppoeiface' '$pppoeiface' interface has gone up at the '$[/system identity get name]' site & route distance for $pppoeiface is less than 10. I don't know what to do!." start-tls=yes
                }
         }
     }
