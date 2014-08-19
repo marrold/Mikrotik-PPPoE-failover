@@ -9,6 +9,6 @@ Instructions for use
 1) Run the script 'PPPoE_script_version.rsc' in order to populate the function that will build the failover scripts.
 2) Run the function-
 	
-$InstallFailover WAN="[PPPoE interface name]" IP1=[IP to Ping] IP2=[IP to Ping]
+$InstallFailover WAN="[PPPoE interface name]" IP1=[IP to Ping] IP2=[IP to Ping] PrimaryEmail=[Primary Email] SecondaryEmail=[Secondary Email]
 
-E.G $InstallFailover WAN="WAN1 - Broadband" IP1=8.8.8.8 IP2=8.8.4.4  
+E.G $InstallFailover WAN="WAN1 - Broadband" IP1="8.8.8.8" IP2="8.8.4.4"  PrimaryEmail="test@example.com" SecondaryEmail="info@example.com"
